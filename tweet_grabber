@@ -1,0 +1,48 @@
+##-----------------
+## Get libraries
+##-----------------
+install.packages('RColorBrewer')
+install.packages('twitteR')
+install.packages('RTextTools')
+install.packages('topicmodels')
+install.packages('tm')
+install.packages('ROAuth')
+install.packages("wordcloud")
+
+library(twitteR)
+library(RTextTools);
+library(topicmodels)
+library(tm);
+library(ROAuth)
+library("wordcloud")
+library("tm")
+
+##------------------------------------------------------------------------------------
+## Connect to API (if you create your own app change consumerKey and consumerSecret)
+##------------------------------------------------------------------------------------
+download.file(url='http://curl.haxx.se/ca/cacert.pem', destfile='cacert.pem')
+reqURL <- 'https://api.twitter.com/oauth/request_token'
+accessURL <- 'https://api.twitter.com/oauth/access_token'
+authURL <- 'https://api.twitter.com/oauth/authorize'
+consumerKey <- 'wl36qGHyjV4gHexsPwIS7Hck4' #put the Consumer Key from Twitter Application
+consumerSecret <- '7bxTF7t79dxqxa7oZ9Xftu9qWWrkaY9TWdCOhSU3hFZrvsx7CA'  #put the Consumer Secret from Twitter Application
+
+Cred <- OAuthFactory$new(consumerKey=consumerKey,
+	                       consumerSecret=consumerSecret,
+	                       requestURL=reqURL,
+	                       accessURL=accessURL,
+	                       authURL=authURL)
+	                       
+Cred$handshake(cainfo = system.file('CurlSSL', 'cacert.pem', package = 'RCurl'))
+
+save(Cred, file='twitter authentication.Rdata')
+load('twitter authentication.Rdata')
+setup_twitter_oauth(consumerKey, consumerSecret, access_token='144134162-jKSvacGP7L5T0BrV6hNr3rY1TcgHevwmYSe1pjaf', access_secret='9fUDWFJqo41iltJUUutSVyVe8J26ZN9bpP7ZxWEZS1sqU')
+
+##-------------------------------------------------------------------------
+## Grab tweets and write them into a text file for Python
+##-------------------------------------------------------------------------
+
+twitter_feed <- searchTwitter('#StarWarsTheForceAwakens', n=10000, lang='en');
+tweetdataframe <- do.call("rbind",lapply(twitter_feed,as.data.frame))
+write.table(tweetdataframe$text,"C:/Users/bfeher/Documents/tweetsaboutexcel.txt", row.names = FALSE) #here specify your own path to write the file to
